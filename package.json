@@ -15,7 +15,7 @@
     "commands": [
       {
         "command": "deepseek-for-vscode.helloWorld",
-        "title": "Hello World"
+        "title": "chat with deepseek models"
       }
     ]
   },
