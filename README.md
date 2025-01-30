@@ -1,71 +1,64 @@
-# deepseek-for-vscode README
+# Deepseek Chat interface for VS Code
 
-This is the README for your extension "deepseek-for-vscode". After writing up a brief description, we recommend including the following sections.
+[![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-brightgreen)](https://marketplace.visualstudio.com/vscode)
+
+A VS Code extension that integrates Deepseek AI capabilities through Ollama, providing seamless chat interactions directly in your editor.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- 💬 **Real-time Chat Interface** - Streamlined chat UI within VS Code
+- 🚀 **Streaming Responses** - Receive AI responses in real-time
+- 📚 **Session History** - Maintains conversation context during VS Code session
+- 🤖 **Multi-Model Support** - Switch between different Ollama models
+- ⚡ **Lightning Fast** - Optimized for quick interactions
+- 🔒 **Local Processing** - Works with locally hosted Ollama instances
 
-For example if there is an image subfolder under your extension project workspace:
+## Prerequisites
 
-\!\[feature X\]\(images/feature-x.png\)
+- [Node.js](https://nodejs.org/) (v16+)
+- [VS Code](https://code.visualstudio.com/) (latest version)
+- [Ollama](https://ollama.ai/) installed and running locally with at least one model
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Installation
 
-## Requirements
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/deepseek-for-vscode.git
+cd deepseek-for-vscode
+```
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+2. Install dependencies:
+```bash
+npm install
+```
 
-## Extension Settings
+3. Run the extension in development mode:
+```bash
+npm run watch
+```
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+4. Press `F5` to open a new VS Code window with the extension loaded
 
-For example:
+## Usage
 
-This extension contributes the following settings:
+1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+2. Search for and select `chat with deepseek`
+3. Type your message in the text area
+4. Select your preferred model from the dropdown
+5. Click "Ask" or press `Enter` to send
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+**Note:** First response might take longer as Ollama loads the model into memory
 
-## Known Issues
+## Configuration
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Ensure Ollama is running with your preferred models. Popular options:
+```bash
+ollama pull deepseek
+ollama pull llama2
+```
 
-## Release Notes
+## Acknowledgments
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- Ollama team for their amazing AI framework
+- Deepseek for their powerful AI models
+- VS Code team for their extensible editor platform
