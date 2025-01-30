@@ -18,7 +18,6 @@ export function activate(context: vscode.ExtensionContext) {
 			const modelResponse = await Ollama.list()
 			const models = modelResponse.models.map(model => model.name);
 			panel.webview.postMessage({command:"modelsList", models});
-			console.log(models);
 		} catch(err){
 			console.log(err);
 			panel.webview.postMessage({command:"modelList", models:`Error: ${String(err)}`});
@@ -26,11 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
 		
 		panel.webview.onDidReceiveMessage(async (message:any) => {
 			if (message.command == "chat"){
-				const userPrompt = message.text;
-				let responseText = ''
+				const {text:userPrompt, selectedModel} = message;
+				let responseText = '' + selectedModel;
 				try{
 					const streamResponse = await Ollama.chat({
-						model:"deepseek-r1:1.5b",
+						model:selectedModel,
 						messages:[{role:'user', content:userPrompt}],
 						stream:true
 					})
@@ -87,10 +86,12 @@ function getWebviewContent():string{
 			<script>
 				const vscode = acquireVsCodeApi();
 				const askBtn = document.getElementById("askButton");
+				const dropdown = document.getElementById("modelsDropdown");
+
 				askBtn.addEventListener("click", () => {
 					const prompt = document.getElementById("prompt").value;
 					askBtn.disabled = true;
-					vscode.postMessage({command:"chat", text:prompt});
+					vscode.postMessage({command:"chat", text:prompt, selectedModel: dropdown.value});
 				});
 				
 				window.addEventListener("message", event => {
@@ -100,7 +101,6 @@ function getWebviewContent():string{
 					} else if(command == "responseEnd"){
 						askBtn.disabled = false;
 					} else if(command == "modelsList"){
-						const dropdown = document.getElementById("modelsDropdown");
 						dropdown.innerHTML = models.map(model => '<option value="' + model + '">' + model + '</option>').join('');
 					}
 				})
