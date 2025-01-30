@@ -109,6 +109,8 @@ function getWebviewContent():string{
 				const vscode = acquireVsCodeApi();
 				const askBtn = document.getElementById("askButton");
 				const dropdown = document.getElementById("modelsDropdown");
+				const container = document.getElementById("chatsContainer");
+				let currentResponseDiv = null; // track active response div
 
 				askBtn.addEventListener("click", () => {
 					const prompt = document.getElementById("prompt").value;
@@ -119,15 +121,16 @@ function getWebviewContent():string{
 				window.addEventListener("message", event => {
 					const {command, text, models} = event.data;
 					if (command == "chatResponse"){
-						const container = document.getElementById("chatsContainer");
-						const newResponse = document.createElement("div");
-						newResponse.classList.add("response")
-						newResponse.innerText = text;
-
-						// Create a new div for each response
-						container.appendChild(newResponse);
+						if(!currentResponseDiv){
+							currentResponseDiv = document.createElement("div");
+							currentResponseDiv.classList.add("response")
+							container.appendChild(currentResponseDiv);
+						}
+					
+						currentResponseDiv.innerText = text;
 					} else if(command == "responseEnd"){
 						askBtn.disabled = false;
+						currentResponseDiv = null // reset for next response
 					} else if(command == "modelsList"){
 						dropdown.innerHTML = models.map(model => '<option value="' + model + '">' + model + '</option>').join('');
 					}
