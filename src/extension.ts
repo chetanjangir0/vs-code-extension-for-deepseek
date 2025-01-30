@@ -27,8 +27,10 @@ export function activate(context: vscode.ExtensionContext) {
 						responseText += part.message.content;
 						panel.webview.postMessage({command:"chatResponse", text:responseText})
 					}
+					panel.webview.postMessage({command:"responseEnd"})
 				} catch(err){
-					panel.webview.postMessage({command:'chatResponse', text:`Error: ${String(err)}`})
+					panel.webview.postMessage({command:'chatResponse', text:`Error: ${String(err)}`});
+					panel.webview.postMessage({ command: "responseEnd" });  // Ensure button re-enables on error
 				}
 			}
 		});
@@ -72,9 +74,10 @@ function getWebviewContent():string{
 			<div id="response"></div>
 			<script>
 				const vscode = acquireVsCodeApi();
-				console.log('live')
-				document.getElementById("askButton").addEventListener("click", () => {
+				const askBtn = document.getElementById("askButton");
+				askBtn.addEventListener("click", () => {
 					const prompt = document.getElementById("prompt").value;
+					askBtn.disabled = true;
 					vscode.postMessage({command:"chat", text:prompt});
 				});
 				
@@ -82,6 +85,8 @@ function getWebviewContent():string{
 					const {command, text} = event.data;
 					if (command == "chatResponse"){
 						document.getElementById("response").innerText = text;
+					} else if(command == "responseEnd"){
+						askBtn.disabled = false;
 					}
 				})
 			</script>
