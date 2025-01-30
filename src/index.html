@@ -1,46 +1,56 @@
 <!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="UTF-8">
-			<style>
-                @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
-                *{
-                    font-family: "Rajdhani", serif;
-                }
-                body{
-                    margin: 1rem;
-                }
-                #prompt{
-                    width: 100%;
-                    box-sizing: border-box;
-                }
-                #response{
-                    border: 1px solid #ccc;
-                    margin-top: 1rem;
-                    padding: 0.5rem;
-                }
+<html lang="en">
 
-			</style>
-		</head>
-		<body>
-			<h2>Deepseek for vscode</h2>
-			<textarea id="prompt" rows="3" placeholder="Ask something..."></textarea>
-			<button id="askButton">Ask</button>
-			<div id="response"></div>
-			<script>
-				const vscode = acquireVsCodeApi();
-				console.log('live')
-				document.getElementById("askButton").addEventListener("click", () => {
-					const prompt = document.getElementById("prompt").value;
-					vscode.postMessage({command:"chat", text:prompt});
-				});
-				
-				window.addEventListener("message", event => {
-					const {command, text} = event.data;
-					if (command == "chatResponse"){
-						document.getElementById("response").innerText = text;
-					}
-				})
-			</script>
-		</body>
-		</html>
+<head>
+	<meta charset="UTF-8">
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+		* {
+			font-family: "Rajdhani", serif;
+		}
+
+		body {
+			margin: 1rem;
+		}
+
+		#prompt {
+			width: 100%;
+			box-sizing: border-box;
+		}
+
+		#response {
+			border: 1px solid #ccc;
+			margin-top: 1rem;
+			padding: 0.5rem;
+		}
+	</style>
+</head>
+
+<body>
+	<h2>Deepseek for vscode</h2>
+	<textarea id="prompt" rows="3" placeholder="Ask something..."></textarea>
+	<button id="askButton">Ask</button>
+	<span id="response">heading</span>
+
+	<script>
+		const vscode = acquireVsCodeApi();
+		const askBtn = document.getElementById("askButton");
+		askBtn.addEventListener("click", () => {
+			const prompt = document.getElementById("prompt").value;
+			askBtn.disabled = true;
+			vscode.postMessage({ command: "chat", text: prompt });
+		});
+
+		window.addEventListener("message", event => {
+			const { command, text } = event.data;
+			if (command == "chatResponse") {
+				document.getElementById("response").innerText = text;
+			} else if (command == "responseEnd") {
+				askBtn.disabled = false;
+			}
+		})
+	</script>
+</body>
+
+</html>

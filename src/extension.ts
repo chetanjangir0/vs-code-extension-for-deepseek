@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 export function activate(context: vscode.ExtensionContext) {
 	console.log('"deepseek-for-vscode" is now active!');
 
-	const disposable = vscode.commands.registerCommand('deepseek-for-vscode.chat', () => {
+	const disposable = vscode.commands.registerCommand('deepseek-for-vscode.chat', async () => {
 		const panel = vscode.window.createWebviewPanel(
 			'deepseek_chat',
 			'Deepseek Chat',
@@ -12,6 +12,17 @@ export function activate(context: vscode.ExtensionContext) {
 			{enableScripts:true}
 		)
 		panel.webview.html = getWebviewContent();
+
+		// fetch model list from ollama as soon as the panel opens
+		try {
+			const modelResponse = await Ollama.list()
+			const models = modelResponse.models.map(model => model.name);
+			panel.webview.postMessage({command:"modelsList", models});
+			console.log(models);
+		} catch(err){
+			console.log(err);
+			panel.webview.postMessage({command:"modelList", models:`Error: ${String(err)}`});
+		}
 		
 		panel.webview.onDidReceiveMessage(async (message:any) => {
 			if (message.command == "chat"){
@@ -71,6 +82,7 @@ function getWebviewContent():string{
 			<h2>Deepseek for vscode</h2>
 			<textarea id="prompt" rows="3" placeholder="Ask something..."></textarea>
 			<button id="askButton">Ask</button>
+			<select id="modelsDropdown"></select>
 			<div id="response"></div>
 			<script>
 				const vscode = acquireVsCodeApi();
@@ -82,11 +94,14 @@ function getWebviewContent():string{
 				});
 				
 				window.addEventListener("message", event => {
-					const {command, text} = event.data;
+					const {command, text, models} = event.data;
 					if (command == "chatResponse"){
 						document.getElementById("response").innerText = text;
 					} else if(command == "responseEnd"){
 						askBtn.disabled = false;
+					} else if(command == "modelsList"){
+						const dropdown = document.getElementById("modelsDropdown");
+						dropdown.innerHTML = models.map(model => '<option value="' + model + '">' + model + '</option>').join('');
 					}
 				})
 			</script>
