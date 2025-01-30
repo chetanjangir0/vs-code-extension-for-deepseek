@@ -11,9 +11,8 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.ViewColumn.One,
 			{enableScripts:true}
 		)
-
 		panel.webview.html = getWebviewContent();
-
+		
 		panel.webview.onDidReceiveMessage(async (message:any) => {
 			if (message.command == "chat"){
 				const userPrompt = message.text;
@@ -47,7 +46,23 @@ function getWebviewContent():string{
 		<head>
 			<meta charset="UTF-8">
 			<style>
-		
+				@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+				*{
+					font-family: "Rajdhani", serif;
+				}
+				body{
+					margin: 1rem;
+				}
+				#prompt{
+					width: 100%;
+					box-sizing: border-box;
+				}
+				#response{
+					border: 1px solid #ccc;
+					margin-top: 1rem;
+					padding: 0.5rem;
+				}
+
 			</style>
 		</head>
 		<body>
