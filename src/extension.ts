@@ -1,19 +1,29 @@
 import Ollama from 'ollama';
 import * as vscode from 'vscode';
 
+interface Message{
+	role:"user" | "system",
+	content:string,
+}
 export function activate(context: vscode.ExtensionContext) {
 	console.log('"deepseek-for-vscode" is now active!');
+
+	// Reset chat history when VS Code starts (might change later)
+	context.workspaceState.update("chatHistory", []);
 
 	const disposable = vscode.commands.registerCommand('deepseek-for-vscode.chat', async () => {
 		const panel = vscode.window.createWebviewPanel(
 			'deepseek_chat',
 			'Deepseek Chat',
 			vscode.ViewColumn.One,
-			{enableScripts:true}
+			{
+				enableScripts:true,
+				retainContextWhenHidden: true // Keeps webview alive even when switching tabs
+			}
 		)
 		panel.webview.html = getWebviewContent();
 
-		// fetch model list from ollama as soon as the panel opens
+		// fetch model list from ollama as soon as the panel opens (for the dropdown)
 		try {
 			const modelResponse = await Ollama.list()
 			const models = modelResponse.models.map(model => model.name);
@@ -23,21 +33,33 @@ export function activate(context: vscode.ExtensionContext) {
 			panel.webview.postMessage({command:"modelList", models:`Error: ${String(err)}`});
 		}
 		
+		// prompting something to the model
 		panel.webview.onDidReceiveMessage(async (message:any) => {
 			if (message.command == "chat"){
 				const {text:userPrompt, selectedModel} = message;
-				let responseText = '' + selectedModel;
+				const userMessage:Message = {role:"user", content:userPrompt};
+
+				//user globalState if you want the data to persist after closing vs code
+				let messages:Message[] = context.workspaceState.get("chatHistory") ?? []; // data stored only for current session
+				messages.push(userMessage);
+				let responseText = "";
 				try{
 					const streamResponse = await Ollama.chat({
 						model:selectedModel,
-						messages:[{role:'user', content:userPrompt}],
+						messages:messages,
 						stream:true
 					})
 					for await (const part of streamResponse){// loop asynchronously
 						responseText += part.message.content;
 						panel.webview.postMessage({command:"chatResponse", text:responseText})
+
 					}
 					panel.webview.postMessage({command:"responseEnd"})
+					
+					// update chat history
+					const systemMessage:Message = {role:"system", content:responseText}
+					messages.push(systemMessage);
+					context.workspaceState.update("chatHistory", messages);
 				} catch(err){
 					panel.webview.postMessage({command:'chatResponse', text:`Error: ${String(err)}`});
 					panel.webview.postMessage({ command: "responseEnd" });  // Ensure button re-enables on error
@@ -69,7 +91,7 @@ function getWebviewContent():string{
 					width: 100%;
 					box-sizing: border-box;
 				}
-				#response{
+				.response{
 					border: 1px solid #ccc;
 					margin-top: 1rem;
 					padding: 0.5rem;
@@ -82,7 +104,7 @@ function getWebviewContent():string{
 			<textarea id="prompt" rows="3" placeholder="Ask something..."></textarea>
 			<button id="askButton">Ask</button>
 			<select id="modelsDropdown"></select>
-			<div id="response"></div>
+			<div id="chatsContainer"></div>
 			<script>
 				const vscode = acquireVsCodeApi();
 				const askBtn = document.getElementById("askButton");
@@ -97,7 +119,13 @@ function getWebviewContent():string{
 				window.addEventListener("message", event => {
 					const {command, text, models} = event.data;
 					if (command == "chatResponse"){
-						document.getElementById("response").innerText = text;
+						const container = document.getElementById("chatsContainer");
+						const newResponse = document.createElement("div");
+						newResponse.classList.add("response")
+						newResponse.innerText = text;
+
+						// Create a new div for each response
+						container.appendChild(newResponse);
 					} else if(command == "responseEnd"){
 						askBtn.disabled = false;
 					} else if(command == "modelsList"){
