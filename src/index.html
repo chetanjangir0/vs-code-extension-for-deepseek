@@ -7,19 +7,48 @@
 		@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
 		* {
+			color: whitesmoke;
 			font-family: "Rajdhani", serif;
+			box-sizing: border-box;
 		}
 
 		body {
 			margin: 1rem;
+			background-color: #1a1a1a;
 		}
 
 		#prompt {
+			background-color: transparent;
 			width: 100%;
-			box-sizing: border-box;
+			outline:none;
+			resize: none;
+			border: none;
+		}
+		#promptContainer{
+			position: absolute;
+			bottom: 0.4rem;
+			width: 100%;
+		}
+		#inputBox{
+			background-color: #2d2d2d;
+			width: 50%;
+			text-align: center;
+			margin: 0 auto;
+			border-radius: 0.4rem;
+			padding: 0.6rem 0.6rem 0 0.6rem;
+		}
+		#askButton{
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			border: none;
+			height: 1.7rem;
+			width: 1.7rem;
+			cursor: pointer;
 		}
 
-		#response {
+		.response {
 			border: 1px solid #ccc;
 			margin-top: 1rem;
 			padding: 0.5rem;
@@ -29,25 +58,44 @@
 
 <body>
 	<h2>Deepseek for vscode</h2>
-	<textarea id="prompt" rows="3" placeholder="Ask something..."></textarea>
-	<button id="askButton">Ask</button>
-	<span id="response">heading</span>
-
+	<div id="promptContainer">
+		<div id="inputBox">
+			<div>
+				<textarea id="prompt" rows="3" placeholder="Ask something..."></textarea>
+				<select id="modelsDropdown"></select>
+				<button id="askButton""><img style="width: 1rem;" src="./static/btn.svg" alt=""></button>
+			</div>
+		</div>
+	</div>
+	<div id="chatsContainer"></div>
 	<script>
 		const vscode = acquireVsCodeApi();
 		const askBtn = document.getElementById("askButton");
+		const dropdown = document.getElementById("modelsDropdown");
+		const container = document.getElementById("chatsContainer");
+		let currentResponseDiv = null; // track active response div
+
 		askBtn.addEventListener("click", () => {
 			const prompt = document.getElementById("prompt").value;
 			askBtn.disabled = true;
-			vscode.postMessage({ command: "chat", text: prompt });
+			vscode.postMessage({ command: "chat", text: prompt, selectedModel: dropdown.value });
 		});
 
 		window.addEventListener("message", event => {
-			const { command, text } = event.data;
+			const { command, text, models } = event.data;
 			if (command == "chatResponse") {
-				document.getElementById("response").innerText = text;
+				if (!currentResponseDiv) {
+					currentResponseDiv = document.createElement("div");
+					currentResponseDiv.classList.add("response")
+					container.appendChild(currentResponseDiv);
+				}
+
+				currentResponseDiv.innerText = text;
 			} else if (command == "responseEnd") {
 				askBtn.disabled = false;
+				currentResponseDiv = null // reset for next response
+			} else if (command == "modelsList") {
+				dropdown.innerHTML = models.map(model => '<option value="' + model + '">' + model + '</option>').join('');
 			}
 		})
 	</script>
