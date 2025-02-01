@@ -42,7 +42,6 @@ export function activate(context: vscode.ExtensionContext) {
 				//user globalState if you want the data to persist after closing vs code
 				let messages:Message[] = context.workspaceState.get("chatHistory") ?? []; // data stored only for current session
 				messages.push(userMessage);
-				console.log(messages)
 				let responseText = "";
 				try{
 					const streamResponse = await Ollama.chat({
@@ -144,6 +143,10 @@ function getWebviewContent():string{
 				justify-content: start;
 				padding-left: 1rem;
 			}
+			#chatsContainer{
+				height: 75vh;
+				overflow: auto;
+			}
 
 			.response {
 				border: 1px solid #ccc;
@@ -189,11 +192,18 @@ function getWebviewContent():string{
 				const prompt = document.getElementById("prompt").value;
 				askBtn.disabled = true;
 				vscode.postMessage({ command: "chat", text: prompt, selectedModel: dropdown.value });
+
+				let loading = document.createElement("div");
+				loading.innerText = "Loading...";
+				loading.id = "loading"
+				container.appendChild(loading)
 			});
 
 			window.addEventListener("message", event => {
 				const { command, text, models } = event.data;
+				const loading = document.getElementById("loading");
 				if (command == "chatResponse") {
+					if (loading) loading.remove();
 					if (!currentResponseDiv) {
 						currentResponseDiv = document.createElement("div");
 						currentResponseDiv.classList.add("response")

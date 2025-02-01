@@ -66,6 +66,10 @@
 			justify-content: start;
 			padding-left: 1rem;
 		}
+		#chatsContainer{
+			height: 75vh;
+			overflow: auto;
+		}
 
 		.response {
 			border: 1px solid #ccc;
@@ -111,11 +115,18 @@
 			const prompt = document.getElementById("prompt").value;
 			askBtn.disabled = true;
 			vscode.postMessage({ command: "chat", text: prompt, selectedModel: dropdown.value });
+
+			let loading = document.createElement("div");
+			loading.innerText = "Loading...";
+			loading.id = "loading"
+			container.appendChild(loading)
 		});
 
 		window.addEventListener("message", event => {
 			const { command, text, models } = event.data;
+			const loading = document.getElementById("loading");
 			if (command == "chatResponse") {
+				if (loading) loading.remove();
 				if (!currentResponseDiv) {
 					currentResponseDiv = document.createElement("div");
 					currentResponseDiv.classList.add("response")
