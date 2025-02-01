@@ -1,8 +1,8 @@
-# Deepseek Chat interface for VS Code
+# Ollama Hub: GUI for Local Models
 
 [![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-brightgreen)](https://marketplace.visualstudio.com/vscode)
 
-A VS Code extension that integrates Deepseek AI capabilities through Ollama, providing seamless chat interactions directly in your editor.
+A VS Code extension that provides graphical interface for managing and interacting with your local Ollama models(like deepseek) directly within VS Code..
 
 ## Features
 
@@ -23,8 +23,8 @@ A VS Code extension that integrates Deepseek AI capabilities through Ollama, pro
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/deepseek-for-vscode.git
-cd deepseek-for-vscode
+git clone https://github.com/chetanjangir0/Ollama-Hub-a-vs-code-extension-.git
+cd Ollama-Hub-a-vs-code-extension
 ```
 
 2. Install dependencies:
@@ -42,7 +42,7 @@ npm run watch
 ## Usage
 
 1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
-2. Search for and select `chat with deepseek`
+2. Search for and select `chat with ollama hub`
 3. Type your message in the text area
 4. Select your preferred model from the dropdown
 5. Click "Ask" or press `Enter` to send
@@ -56,9 +56,3 @@ Ensure Ollama is running with your preferred models. Popular options:
 ollama pull deepseek
 ollama pull llama2
 ```
-
-## Acknowledgments
-
-- Ollama team for their amazing AI framework
-- Deepseek for their powerful AI models
-- VS Code team for their extensible editor platform

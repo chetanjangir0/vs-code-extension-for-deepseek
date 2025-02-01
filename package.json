@@ -1,7 +1,7 @@
 {
-  "name": "deepseek-for-vscode",
-  "displayName": "deepseek for vscode",
-  "description": "",
+  "name": "ollama_hub",
+  "displayName": "Ollama Hub: GUI for Local Models",
+  "description": "graphical interface for managing and interacting with your local Ollama models(like deepseek) directly within VS Code.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.96.0"
@@ -9,13 +9,13 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["*"],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "deepseek-for-vscode.chat",
-        "title": "chat with deepseek"
+        "command": "ollama_hub.chat",
+        "title": "chat with ollama hub"
       }
     ]
   },

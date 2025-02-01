@@ -8,15 +8,15 @@ interface Message{
 	content:string,
 }
 export function activate(context: vscode.ExtensionContext) {
-	console.log('"deepseek-for-vscode" is now active!');
+	console.log('"Ollama Hub" is now active!');
 
 	// Reset chat history when VS Code starts (might change later)
 	context.workspaceState.update("chatHistory", []);
 
-	const disposable = vscode.commands.registerCommand('deepseek-for-vscode.chat', async () => {
+	const disposable = vscode.commands.registerCommand('ollama_hub.chat', async () => {
 		const panel = vscode.window.createWebviewPanel(
-			'deepseek_chat',
-			'Deepseek Chat',
+			'ollama_hub',
+			'Ollama Hub',
 			vscode.ViewColumn.One,
 			{
 				enableScripts:true,
