@@ -109,18 +109,27 @@
 		const askBtn = document.getElementById("askButton");
 		const dropdown = document.getElementById("modelsDropdown");
 		const container = document.getElementById("chatsContainer");
+		const promptInput = document.getElementById("prompt");
 		let currentResponseDiv = null; // track active response div
 
 		askBtn.addEventListener("click", () => {
-			const prompt = document.getElementById("prompt").value;
+			const prompt = promptInput.value;
 			askBtn.disabled = true;
 			vscode.postMessage({ command: "chat", text: prompt, selectedModel: dropdown.value });
 
 			let loading = document.createElement("div");
 			loading.innerText = "Loading...";
-			loading.id = "loading"
+			loading.id = "loading";
 			container.appendChild(loading)
 		});
+
+		// also ask when user enters into prompt
+		promptInput.addEventListener("keydown", (event) =>{
+			if(event.key == "Enter" && !event.shiftKey){// Prevent shift+enter from triggering
+				event.preventDefault();
+				askBtn.click();
+			}
+		})
 
 		window.addEventListener("message", event => {
 			const { command, text, models } = event.data;
