@@ -76,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 function getWebviewContent(context: vscode.ExtensionContext):string{
-	const filePath = path.join(context.extensionPath, 'src', 'webview.html');
+	const filePath = context.asAbsolutePath('src/webview.html');
     return fs.readFileSync(filePath, 'utf8');
 }
 export function deactivate() {}
