@@ -1,7 +1,5 @@
 import Ollama from 'ollama';
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 
 interface Message{
 	role:"user" | "system",
@@ -75,8 +73,167 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 
-function getWebviewContent(context: vscode.ExtensionContext):string{
-	const filePath = context.asAbsolutePath('src/webview.html');
-    return fs.readFileSync(filePath, 'utf8');
+function getWebviewContent(context: vscode.ExtensionContext): string {
+    return /*html*/`
+		<!DOCTYPE html>
+		<html lang="en">
+
+		<head>
+			<meta charset="UTF-8">
+			<style>
+				@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+				* {
+					color: whitesmoke;
+					font-family: "Rajdhani", serif;
+					box-sizing: border-box;
+				}
+
+				body {
+					margin: 1rem;
+					background-color: #1a1a1a;
+				}
+
+				#prompt {
+					background-color: transparent;
+					width: 100%;
+					outline:none;
+					resize: none;
+					border: none;
+				}
+				#promptContainer{
+					position:fixed;
+					bottom: 0;
+					width: 100%;
+				}
+				#inputBox{
+					background-color: #2d2d2d;
+					width: 50%;
+					text-align: center;
+					margin: 0 auto;
+					border-radius: 0.4rem;
+					padding: 0.6rem 0.6rem 0 0.6rem;
+				}
+				#askButton{
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					border-radius: 50%;
+					border: none;
+					height: 1.7rem;
+					width: 1.7rem;
+					cursor: pointer;
+					margin-left: 1rem;
+				}
+				#modelsDropdown{
+					width: 8rem;
+					height: 1.5rem;
+					background-color: #2d2d2d;
+					border-radius: 0.3rem;
+					border: none;
+					text-align: center;
+				}
+				#modelsDropdown:hover{
+					background-color: #1a1a1a;
+					cursor: pointer;
+				}
+				#optionsContainer{
+					display: flex;
+					align-items: center;
+					justify-content: start;
+					padding-left: 1rem;
+				}
+				#chatsContainer{
+					height: 75vh;
+					overflow: auto;
+				}
+
+				.response {
+					font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+					font-size: 1rem;
+					line-height: 1.75;
+					background-color: #2d2d2d;
+					border-radius: 1rem;
+					margin-top: 1rem;
+					padding: 0.5rem;
+				}
+				#loading{
+					margin-top: 1rem;
+				}
+			</style>
+		</head>
+
+		<body>
+			<h2>Deepseek for vscode</h2>
+			<div id="promptContainer">
+				<div id="inputBox">
+					<div>
+						<textarea id="prompt" rows="3" placeholder="Ask something..."></textarea>
+						<div id="optionsContainer">
+							<select id="modelsDropdown">
+								<option value="" disabled selected>Select a model</option>
+							</select>
+							<button id="askButton"">
+								<svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path fill-rule="evenodd" clip-rule="evenodd" d="M7 16c-.595 0-1.077-.462-1.077-1.032V1.032C5.923.462 6.405 0 7 0s1.077.462 1.077 1.032v13.936C8.077 15.538 7.595 16 7 16z" fill="#2a2a2a"></path>
+									<path fill-rule="evenodd" clip-rule="evenodd" d="M.315 7.44a1.002 1.002 0 0 1 0-1.46L6.238.302a1.11 1.11 0 0 1 1.523 0c.421.403.421 1.057 0 1.46L1.838 7.44a1.11 1.11 0 0 1-1.523 0z" fill="#2a2a2a"></path>
+									<path fill-rule="evenodd" clip-rule="evenodd" d="M13.685 7.44a1.11 1.11 0 0 1-1.523 0L6.238 1.762a1.002 1.002 0 0 1 0-1.46 1.11 1.11 0 0 1 1.523 0l5.924 5.678c.42.403.42 1.056 0 1.46z" fill="#2a2a2a"></path>
+								</svg>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="chatsContainer"></div>
+			<script>
+				const vscode = acquireVsCodeApi();
+				const askBtn = document.getElementById("askButton");
+				const dropdown = document.getElementById("modelsDropdown");
+				const container = document.getElementById("chatsContainer");
+				const promptInput = document.getElementById("prompt");
+				let currentResponseDiv = null; // track active response div
+
+				askBtn.addEventListener("click", () => {
+					const prompt = promptInput.value;
+					askBtn.disabled = true;
+					vscode.postMessage({ command: "chat", text: prompt, selectedModel: dropdown.value });
+
+					let loading = document.createElement("div");
+					loading.innerText = "Loading...";
+					loading.id = "loading";
+					container.appendChild(loading)
+				});
+
+				// also ask when user enters into prompt
+				promptInput.addEventListener("keydown", (event) =>{
+					if(event.key == "Enter" && !event.shiftKey){// Prevent shift+enter from triggering
+						event.preventDefault();
+						askBtn.click();
+					}
+				})
+
+				window.addEventListener("message", event => {
+					const { command, text, models } = event.data;
+					const loading = document.getElementById("loading");
+					if (command == "chatResponse") {
+						if (loading) loading.remove();
+						if (!currentResponseDiv) {
+							currentResponseDiv = document.createElement("div");
+							currentResponseDiv.classList.add("response")
+							container.appendChild(currentResponseDiv);
+						}
+
+						currentResponseDiv.innerText = text;
+					} else if (command == "responseEnd") {
+						askBtn.disabled = false;
+						currentResponseDiv = null // reset for next response
+					} else if (command == "modelsList") {
+						dropdown.innerHTML = '<option value="" disabled selected>Select a model</option>' + models.map(model => '<option value="' + model + '">' + model + '</option>').join('');
+					}
+				})
+			</script>
+		</body>
+		</html>
+	`
 }
 export function deactivate() {}

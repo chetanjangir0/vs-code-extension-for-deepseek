@@ -3,11 +3,7 @@
   "displayName": "Ollama Hub: GUI for Local Models",
   "publisher":"chetanjangir",
   "description": "graphical interface for managing and interacting with your local Ollama models(like deepseek) directly within VS Code.",
-  "version": "0.0.4",
-  "files": [
-    "out/**",
-    "src/webview.html"
-  ],
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/chetanjangir0/Ollama-Hub-a-vs-code-extension.git"
@@ -21,9 +17,6 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-    "webview": {
-      "default": "src/webview.html"
-    },
     "commands": [
       {
         "command": "ollama_hub.chat",
